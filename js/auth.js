@@ -82,8 +82,10 @@ registerBtn.addEventListener("click", async () => {
     }));
 
     showToast("OTP sent (check console)", "success");
-    console.log("OTP:", otp);
-
+    await apiRequest({
+    action: "sendOTP",
+    email: email
+});
     showOTPModal();
 });
 
