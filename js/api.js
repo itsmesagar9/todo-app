@@ -7,16 +7,11 @@ const API_URL = "https://script.google.com/macros/s/AKfycbxHvce7F5AtWiKw-nifG9eg
 // ================= GENERIC REQUEST =================
 
 async function apiRequest(data) {
-    try {
-        const res = await fetch(API_URL, {
-            method: "POST",
-            body: JSON.stringify(data)
-        });
-
-        return await res.json();
-    } catch (err) {
-        showToast("API Error", "error");
-    }
+    const res = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify(data)
+    });
+    return await res.json();
 }
 
 
