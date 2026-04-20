@@ -1,109 +1,127 @@
-// ================= FORM SWITCH =================
 
-const loginBox = document.getElementById("loginBox");
-const registerBox = document.getElementById("registerBox");
-
-document.getElementById("showRegister").addEventListener("click", () => {
-    loginBox.classList.add("hidden");
-    registerBox.classList.remove("hidden");
-});
-
-document.getElementById("showLogin").addEventListener("click", () => {
-    registerBox.classList.add("hidden");
-    loginBox.classList.remove("hidden");
-});
-
-
-// ================= PASSWORD TOGGLE =================
-
-const toggleIcons = document.querySelectorAll(".toggle-password");
-
-toggleIcons.forEach(icon => {
-    icon.addEventListener("click", () => {
-        const input = icon.previousElementSibling;
-
-        if (input.type === "password") {
-            input.type = "text";
-            icon.classList.remove("fa-eye");
-            icon.classList.add("fa-eye-slash");
-        } else {
-            input.type = "password";
-            icon.classList.remove("fa-eye-slash");
-            icon.classList.add("fa-eye");
-        }
-    });
-});
-
-
-// ================= THEME TOGGLE =================
-
-const themeIcon = document.getElementById("themeIcon");
-
-// Load saved theme
-if (localStorage.getItem("theme") === "dark") {
-    document.body.classList.add("dark");
-    themeIcon.classList.replace("fa-moon", "fa-sun");
-}
-
-themeIcon.addEventListener("click", () => {
-    document.body.classList.toggle("dark");
-
-    if (document.body.classList.contains("dark")) {
-        themeIcon.classList.replace("fa-moon", "fa-sun");
-        localStorage.setItem("theme", "dark");
-    } else {
-        themeIcon.classList.replace("fa-sun", "fa-moon");
-        localStorage.setItem("theme", "light");
-    }
-});
+// ================= UI CONTROLLER =================
 
 
 // ================= TOAST SYSTEM =================
-
-// 👉 You will use this in other JS files
 function showToast(message, type = "success") {
 
     const toast = document.createElement("div");
-    toast.className = "toast " + type;
+    toast.className = `toast ${type}`;
+
     toast.innerText = message;
 
     document.body.appendChild(toast);
 
+    // Auto remove after 3s
     setTimeout(() => {
-        toast.classList.add("show");
-    }, 100);
+        toast.classList.add("hide");
 
-    setTimeout(() => {
-        toast.classList.remove("show");
-        setTimeout(() => toast.remove(), 300);
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+
     }, 3000);
 }
 
 
-// ================= MODAL CONFIRM =================
-
-// 👉 Reusable confirm popup
-function confirmAction(message, callback) {
+// ================= MODAL SYSTEM =================
+function openModal(contentHTML) {
 
     const modal = document.createElement("div");
     modal.className = "modal";
 
     modal.innerHTML = `
         <div class="modal-box">
-            <p>${message}</p>
-            <button id="yesBtn">Yes</button>
-            <button id="noBtn">No</button>
+            ${contentHTML}
+            <button onclick="closeModal()" class="close-btn">Close</button>
         </div>
     `;
 
     document.body.appendChild(modal);
+}
 
-    document.getElementById("yesBtn").onclick = () => {
-        callback();
-        modal.remove();
-    };
 
-    document.getElementById("noBtn").onclick = () => {
-        modal.remove();
-    };
+// CLOSE MODAL
+function closeModal() {
+
+    const modal = document.querySelector(".modal");
+    if (modal) modal.remove();
+}
+
+
+// ================= DARK / LIGHT MODE =================
+function toggleTheme() {
+
+    document.body.classList.toggle("light");
+
+    // Save preference
+    const mode = document.body.classList.contains("light") ? "light" : "dark";
+    localStorage.setItem("theme", mode);
+}
+
+
+// LOAD THEME ON START
+(function initTheme() {
+
+    const saved = localStorage.getItem("theme");
+
+    if (saved === "light") {
+        document.body.classList.add("light");
+    }
+
+})();
+
+
+// ================= EMPTY STATE HANDLER =================
+function showEmptyState(containerId, message = "No data found") {
+
+    const container = document.getElementById(containerId);
+
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="empty-state">
+            <p>${message}</p>
+        </div>
+    `;
+}
+
+
+// ================= LOADING OVERLAY (OPTIONAL) =================
+function showLoading(text = "Loading...") {
+
+    const loader = document.createElement("div");
+    loader.id = "globalLoader";
+
+    loader.innerHTML = `
+        <div class="loader-box">
+            <h3>${text}</h3>
+        </div>
+    `;
+
+    document.body.appendChild(loader);
+}
+
+
+// REMOVE LOADING
+function hideLoading() {
+
+    const loader = document.getElementById("globalLoader");
+    if (loader) loader.remove();
+}
+
+
+// ================= BUTTON LOADING STATE =================
+function setButtonLoading(btn, state = true) {
+
+    if (!btn) return;
+
+    if (state) {
+        btn.dataset.original = btn.innerText;
+        btn.innerText = "Loading...";
+        btn.disabled = true;
+    } else {
+        btn.innerText = btn.dataset.original;
+        btn.disabled = false;
+    }
 }
