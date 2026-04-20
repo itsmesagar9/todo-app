@@ -1,244 +1,197 @@
+
+let currentUser = null;
+let tasks = [];
+let lists = [];
+let selectedListId = null;
+
+
 // ================= INIT =================
+document.addEventListener("DOMContentLoaded", async () => {
 
-const user = JSON.parse(localStorage.getItem("user"));
+    currentUser = JSON.parse(localStorage.getItem("user"));
 
-if (!user) {
-    window.location.href = "index.html";
-}
+    if (!currentUser) {
+        window.location.href = "index.html";
+        return;
+    }
 
-const listContainer = document.getElementById("listContainer");
-const taskContainer = document.getElementById("taskContainer");
-const emptyState = document.getElementById("emptyState");
-let editTaskId = null;
-let currentListId = null;
-let allTasks = [];
+    console.log("Dashboard Loaded for:", currentUser.email);
+
+    await loadLists();
+    await loadTasks();
+
+    bindEvents();
+});
+
 
 // ================= LOAD LISTS =================
-
 async function loadLists() {
 
-    const res = await getLists(user.id);
+    const res = await getLists(currentUser.id);
 
-    listContainer.innerHTML = "";
+    if (res.status === "success") {
+        lists = res.lists;
+        renderLists();
+    }
+}
 
-    res.lists.forEach(list => {
+
+// ================= LOAD TASKS =================
+async function loadTasks() {
+
+    const res = await getTasks(currentUser.id);
+
+    if (res.status === "success") {
+        tasks = res.tasks;
+        renderTasks();
+    }
+}
+
+
+// ================= RENDER LISTS =================
+function renderLists() {
+
+    const container = document.getElementById("listContainer");
+    container.innerHTML = "";
+
+    lists.forEach(list => {
+
         const li = document.createElement("li");
         li.innerText = list.name;
 
         li.onclick = () => {
-            currentListId = list.id;
-            document.getElementById("currentList").innerText = list.name;
-            loadTasks();
+            selectedListId = list.id;
+            renderTasks();
         };
 
-        listContainer.appendChild(li);
+        container.appendChild(li);
     });
 }
 
-// ================= LOAD TASKS =================
 
-async function loadTasks() {
-
-    const res = await getTasks(user.id);
-
-    allTasks = res.tasks;
-
-    renderTasks();
-}
-// ================= OPEN MODAL =================
-
-// ================= RENDER =================
-
+// ================= RENDER TASKS =================
 function renderTasks() {
 
-    taskContainer.innerHTML = "";
+    const container = document.getElementById("taskContainer");
+    const empty = document.getElementById("emptyState");
 
-    const filter = document.getElementById("filterStatus").value;
+    container.innerHTML = "";
 
-    const filtered = allTasks.filter(t =>
-        (!currentListId || t.listId === currentListId) &&
-        (!filter || t.status === filter)
-    );
+    let filtered = tasks;
+
+    // Filter by list
+    if (selectedListId) {
+        filtered = filtered.filter(t => t.listId === selectedListId);
+    }
+
+    // Filter by search
+    const search = document.getElementById("searchTask")?.value || "";
+    if (search) {
+        filtered = filtered.filter(t =>
+            t.title.toLowerCase().includes(search.toLowerCase())
+        );
+    }
+
+    // Filter by status
+    const status = document.getElementById("filterStatus")?.value;
+    if (status) {
+        filtered = filtered.filter(t => t.status === status);
+    }
 
     if (filtered.length === 0) {
-        emptyState.classList.remove("hidden");
+        empty.style.display = "block";
         return;
     }
 
-    emptyState.classList.add("hidden");
+    empty.style.display = "none";
 
     filtered.forEach(task => {
 
         const div = document.createElement("div");
         div.className = "task";
-
         div.setAttribute("data-status", task.status);
 
         div.innerHTML = `
-    <h4>${task.title}</h4>
-    <p>Status: ${task.status}</p>
-    <p>${task.description || ""}</p>
+            <h4>${task.title}</h4>
+            <p>Status: ${task.status}</p>
+            <button onclick="deleteTask('${task.id}')">Delete</button>
+            <button onclick="editTask('${task.id}')">Edit</button>
+        `;
 
-    <button onclick='openTaskModal(${JSON.stringify(task)})'>Edit</button>
-    <button onclick="deleteTask('${task.id}')">Delete</button>
-`;
-        taskContainer.appendChild(div);
+        container.appendChild(div);
     });
 }
 
-function openTaskModal(task = null) {
 
-    document.getElementById("taskModal").classList.remove("hidden");
+// ================= CREATE TASK =================
+async function createTaskHandler() {
 
-    if (task) {
-        editTaskId = task.id;
+    const title = prompt("Task Title");
+    if (!title) return;
 
-        document.getElementById("modalTitle").innerText = "Edit Task";
-
-        document.getElementById("taskTitle").value = task.title;
-        document.getElementById("taskStatus").value = task.status;
-
-    } else {
-        editTaskId = null;
-        document.getElementById("modalTitle").innerText = "Add Task";
-    }
-}
-
-function closeTaskModal() {
-    document.getElementById("taskModal").classList.add("hidden");
-}
-// ================= ADD LIST =================
-
-document.getElementById("addListBtn").onclick = async () => {
-
-    const name = prompt("Enter list name");
-
-    if (!name) return;
-
-    await createList(user.id, name);
-
-    showToast("List created");
-
-    loadLists();
-};
-
-// ================= ADD TASK =================
-
-document.getElementById("addTaskBtn").onclick = async () => {
-
-    if (!currentListId) {
-        showToast("Select a list first", "error");
-        return;
-    }
-
-    openTaskModal();
-    const status = prompt("Status (Not Started / In Progress / Completed / Delayed)");
-
-    await createTask({
-        userId: user.id,
-        listId: currentListId,
+    const task = {
+        userId: currentUser.id,
+        listId: selectedListId || "",
         title,
         description: "",
-        status,
-        start: "",
-        end: "",
-        secStart: "",
-        secEnd: "",
-        recurring: "no",
-        reason: ""
-    });
+        status: "Not Started"
+    };
 
-    showToast("Task added");
+    const res = await createTask(task);
 
-    loadTasks();
-};
-
-// ================= DELETE =================
-
-async function deleteTask(id) {
-
-    confirmAction("Delete this task?", async () => {
-
-        await deleteItem("task", id);
-
-        showToast("Task deleted");
-
-        loadTasks();
-    });
+    if (res.status === "success") {
+        await loadTasks();
+    }
 }
 
-// ================= FILTER =================
 
-document.getElementById("filterStatus").onchange = renderTasks;
+// ================= DELETE TASK =================
+async function deleteTask(id) {
 
-// ================= SEARCH =================
+    const res = await deleteItem(id, "task");
 
-document.getElementById("searchInput").oninput = function () {
+    if (res.status === "success") {
+        await loadTasks();
+    }
+}
 
-    const keyword = this.value.toLowerCase();
 
-    const filtered = allTasks.filter(t =>
-        t.title.toLowerCase().includes(keyword)
-    );
+// ================= EDIT TASK =================
+async function editTask(id) {
 
-    taskContainer.innerHTML = "";
+    const task = tasks.find(t => t.id === id);
 
-    filtered.forEach(task => {
-        const div = document.createElement("div");
-        div.className = "task";
-        div.innerHTML = `<h4>${task.title}</h4>`;
-        taskContainer.appendChild(div);
-    });
-};
+    const newTitle = prompt("Edit Task", task.title);
+
+    if (!newTitle) return;
+
+    const updated = {
+        id,
+        title: newTitle,
+        description: task.description,
+        status: task.status
+    };
+
+    const res = await updateTaskAPI(updated);
+
+    if (res.status === "success") {
+        await loadTasks();
+    }
+}
+
+
+// ================= FILTER EVENTS =================
+function bindEvents() {
+
+    document.getElementById("searchTask").addEventListener("input", renderTasks);
+    document.getElementById("filterStatus").addEventListener("change", renderTasks);
+
+    document.getElementById("addTaskBtn").addEventListener("click", createTaskHandler);
+}
+
 
 // ================= LOGOUT =================
-
-document.getElementById("logoutBtn").onclick = () => {
+function logout() {
     localStorage.removeItem("user");
     window.location.href = "index.html";
-};
-document.getElementById("saveTaskBtn").onclick = async () => {
-
-    const title = document.getElementById("taskTitle").value;
-    const desc = document.getElementById("taskDesc").value;
-    const status = document.getElementById("taskStatus").value;
-    const start = document.getElementById("taskStart").value;
-    const end = document.getElementById("taskEnd").value;
-    const secStart = document.getElementById("taskSecStart").value;
-    const secEnd = document.getElementById("taskSecEnd").value;
-    const recurring = document.getElementById("taskRecurring").value;
-
-    let reason = document.getElementById("taskReason").value;
-
-    if (reason === "Other") {
-        reason = document.getElementById("customReason").value;
-    }
-
-    if (!title) {
-        showToast("Title required", "error");
-        return;
-    }
-
-    await createTask({
-        userId: user.id,
-        listId: currentListId,
-        title,
-        description: desc,
-        status,
-        start,
-        end,
-        secStart,
-        secEnd,
-        recurring,
-        reason
-    });
-
-    showToast("Task saved");
-
-    closeTaskModal();
-    loadTasks();
-};
-// ================= INIT LOAD =================
-
-loadLists();
-loadTasks();
+}
