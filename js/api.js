@@ -1,31 +1,43 @@
-// ================= API CONFIG =================
 
-// 👉 PASTE YOUR WEB APP URL HERE
-const API_URL = "https://script.google.com/macros/s/AKfycbxHvce7F5AtWiKw-nifG9egDAEQWeLYPn9MSEkcxKjjrWYGX9aVrUnFN-VzeTBeTWGW/exec";
+// ================= CONFIG =================
+const API_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
 
 
-// ================= GENERIC REQUEST =================
+// ================= CORE REQUEST FUNCTION =================
+async function apiRequest(payload) {
 
-async function apiRequest(data) {
-    const res = await fetch(API_URL, {
-        method: "POST",
-        body: JSON.stringify(data)
-    });
-    return await res.json();
+    try {
+
+        const res = await fetch(API_URL, {
+            method: "POST",
+            body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        return data;
+
+    } catch (error) {
+        console.error("API Error:", error);
+        return { status: "error", message: "Network error" };
+    }
 }
 
 
-// ================= USER =================
+// ================= AUTH APIs =================
 
-async function registerUser(data) {
-    return await apiRequest({
+// REGISTER USER (final step after OTP)
+function registerUser(userData) {
+    return apiRequest({
         action: "register",
-        data
+        data: userData
     });
 }
 
-async function loginUser(email, password) {
-    return await apiRequest({
+
+// LOGIN USER
+function loginUser(email, password) {
+    return apiRequest({
         action: "login",
         email,
         password
@@ -33,47 +45,82 @@ async function loginUser(email, password) {
 }
 
 
-// ================= LIST =================
+// ================= OTP APIs =================
 
-async function createList(userId, name) {
-    return await apiRequest({
-        action: "createList",
-        userId,
-        name
-    });
-}
-
-async function getLists(userId) {
-    return await apiRequest({
-        action: "getLists",
-        userId
+// SEND OTP TO EMAIL
+function sendOTP(email) {
+    return apiRequest({
+        action: "sendOTP",
+        email
     });
 }
 
 
-// ================= TASK =================
+// VERIFY OTP
+function verifyOTP(email, otp) {
+    return apiRequest({
+        action: "verifyOTP",
+        email,
+        otp
+    });
+}
 
-async function createTask(task) {
-    return await apiRequest({
+
+// ================= TASK APIs =================
+
+// CREATE TASK
+function createTask(task) {
+    return apiRequest({
         action: "createTask",
         ...task
     });
 }
 
-async function getTasks(userId) {
-    return await apiRequest({
+
+// GET TASKS
+function getTasks(userId) {
+    return apiRequest({
         action: "getTasks",
         userId
     });
 }
 
 
-// ================= DELETE =================
+// UPDATE TASK
+function updateTaskAPI(task) {
+    return apiRequest({
+        action: "updateTask",
+        ...task
+    });
+}
 
-async function deleteItem(type, id) {
-    return await apiRequest({
+
+// DELETE ITEM (task or list)
+function deleteItem(id, type) {
+    return apiRequest({
         action: "deleteItem",
-        type,
-        id
+        id,
+        type
+    });
+}
+
+
+// ================= LIST APIs =================
+
+// CREATE LIST
+function createList(userId, name) {
+    return apiRequest({
+        action: "createList",
+        userId,
+        name
+    });
+}
+
+
+// GET LISTS
+function getLists(userId) {
+    return apiRequest({
+        action: "getLists",
+        userId
     });
 }
