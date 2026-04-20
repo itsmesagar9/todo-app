@@ -1,6 +1,6 @@
 
 // ================= CONFIG =================
-const API_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+const API_URL = "https://script.google.com/macros/s/AKfycbxHvce7F5AtWiKw-nifG9egDAEQWeLYPn9MSEkcxKjjrWYGX9aVrUnFN-VzeTBeTWGW/exec";
 
 
 // ================= CORE REQUEST FUNCTION =================
