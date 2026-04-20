@@ -1,0 +1,400 @@
+/* ================= RESET ================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    transition: all 0.3s ease;
+}
+
+/* ================= THEME VARIABLES ================= */
+:root {
+    --bg: #f5f7ff;
+    --text: #111;
+    --card: rgba(255, 255, 255, 0.6);
+    --border: rgba(255, 255, 255, 0.3);
+    --primary: #6c63ff;
+    --accent: #00e0ff;
+}
+
+body.dark {
+    --bg: #0b0f2a;
+    --text: #ffffff;
+    --card: rgba(255, 255, 255, 0.08);
+    --border: rgba(255, 255, 255, 0.15);
+    --primary: #4facfe;
+    --accent: #00f2fe;
+}
+
+/* ================= BODY ================= */
+body {
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+/* ================= PRELOADER ================= */
+#preloader {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.loader-container {
+    text-align: center;
+}
+
+.progress-bar {
+    width: 250px;
+    height: 10px;
+    background: #ccc;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 20px auto;
+}
+
+#progress {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+}
+
+#percent {
+    font-weight: bold;
+}
+
+/* ================= AUTH CONTAINER ================= */
+.auth-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+/* ================= FORM BOX ================= */
+.form-box {
+    width: 350px;
+    padding: 30px;
+    border-radius: 20px;
+    background: var(--card);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    animation: fadeIn 0.5s ease;
+}
+
+.form-box h2 {
+    margin-bottom: 20px;
+}
+
+/* ================= INPUTS ================= */
+.form-box input {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    outline: none;
+}
+
+/* FIX TEXT VISIBILITY */
+.form-box input::placeholder {
+    color: rgba(150, 150, 150, 0.7);
+}
+
+/* ================= PASSWORD ================= */
+.password-field {
+    position: relative;
+}
+
+.password-field i {
+    position: absolute;
+    right: 10px;
+    top: 14px;
+    cursor: pointer;
+}
+
+/* ================= BUTTON ================= */
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+/* ================= LINKS ================= */
+span {
+    color: var(--primary);
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* ================= TERMS ================= */
+.terms {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    margin-top: 10px;
+}
+
+.terms input {
+    width: auto;
+    margin-right: 5px;
+}
+
+/* ================= THEME TOGGLE ================= */
+.theme-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+/* ================= FOOTER ================= */
+footer {
+    text-align: center;
+    padding: 20px;
+}
+
+.social-icons a {
+    margin: 0 8px;
+    color: var(--text);
+    font-size: 18px;
+    transition: 0.3s;
+}
+
+.social-icons a:hover {
+    color: var(--primary);
+}
+
+/* ================= HIDDEN ================= */
+.hidden {
+    display: none;
+}
+
+/* ================= ANIMATIONS ================= */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ================= RESPONSIVE ================= */
+@media(max-width: 500px) {
+    .form-box {
+        width: 90%;
+    }
+}
+/* ================= TOAST ================= */
+.toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #111;
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 10px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: 0.3s;
+    z-index: 9999;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast.success {
+    background: green;
+}
+
+.toast.error {
+    background: red;
+}
+
+/* ================= MODAL ================= */
+.modal {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.modal-box {
+    background: var(--card);
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+}
+
+.modal-box button {
+    margin: 10px;
+    width: auto;
+    padding: 8px 15px;
+}
+.modal-box input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+}
+/* ================= DASHBOARD ================= */
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    background: var(--card);
+}
+
+.dashboard {
+    display: flex;
+    height: calc(100vh - 60px);
+}
+
+.sidebar {
+    width: 250px;
+    padding: 15px;
+    border-right: 1px solid var(--border);
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar li {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.sidebar li:hover {
+    background: var(--card);
+}
+
+.task-area {
+    flex: 1;
+    padding: 20px;
+}
+
+.task-header {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.task-container {
+    margin-top: 20px;
+}
+
+.task {
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    background: var(--card);
+}
+
+.empty {
+    text-align: center;
+    margin-top: 50px;
+}
+/* ================= MODAL LARGE ================= */
+.modal-box.large {
+    width: 400px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* TEXTAREA */
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+}
+
+/* SELECT */
+select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+}
+
+/* DATE INPUT */
+input[type="datetime-local"] {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+}
+
+/* MODAL BUTTONS */
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* TASK CARD UPGRADE */
+.task {
+    transition: 0.3s;
+    border-left: 5px solid var(--primary);
+}
+
+.task:hover {
+    transform: translateY(-3px);
+}
+
+/* STATUS COLORS */
+.task[data-status="Completed"] {
+    border-left-color: green;
+}
+
+.task[data-status="In Progress"] {
+    border-left-color: orange;
+}
+
+.task[data-status="Delayed"] {
+    border-left-color: red;
+}

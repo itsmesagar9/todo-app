@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo Pro App</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- ================= PRELOADER ================= -->
+    <div id="preloader">
+        <div class="loader-container">
+            <h1>Todo Pro</h1>
+            <div class="progress-bar">
+                <div id="progress"></div>
+            </div>
+            <p id="percent">0%</p>
+        </div>
+    </div>
+
+    <!-- ================= AUTH CONTAINER ================= -->
+    <div class="auth-container hidden" id="authContainer">
+
+        <!-- THEME TOGGLE -->
+        <div class="theme-toggle">
+            <i class="fa-solid fa-moon" id="themeIcon"></i>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div class="form-box" id="loginBox">
+            <h2>Login</h2>
+
+            <input type="email" id="loginEmail" placeholder="Email">
+
+            <div class="password-field">
+                <input type="password" id="loginPassword" placeholder="Password">
+                <i class="fa-solid fa-eye toggle-password"></i>
+            </div>
+
+            <button id="loginBtn">Login</button>
+
+            <p>Don't have an account? <span id="showRegister">Register</span></p>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div class="form-box hidden" id="registerBox">
+            <h2>Register</h2>
+
+            <input type="text" id="username" placeholder="Username (letters + numbers)">
+            <input type="text" id="fullname" placeholder="Full Name">
+            <input type="email" id="email" placeholder="Email">
+            <input type="text" id="phone" placeholder="Phone Number">
+
+            <div class="password-field">
+                <input type="password" id="password" placeholder="Password">
+                <i class="fa-solid fa-eye toggle-password"></i>
+            </div>
+
+            <div class="password-field">
+                <input type="password" id="confirmPassword" placeholder="Confirm Password">
+                <i class="fa-solid fa-eye toggle-password"></i>
+            </div>
+
+            <!-- TERMS -->
+            <div class="terms">
+                <input type="checkbox" id="agree">
+                <label>I agree to <a href="terms.html">Terms & Conditions</a></label>
+            </div>
+
+            <button id="registerBtn">Register</button>
+
+            <p>Already have account? <span id="showLogin">Login</span></p>
+        </div>
+
+    </div>
+
+    <!-- ================= FOOTER ================= -->
+    <footer>
+        <p>© Sagar Dulal</p>
+        <p>Owner: Sagar Dulal</p>
+        <p>
+            Website:
+            <a href="https://sagardulal09.github.io/SagarDulal/" target="_blank">
+                Visit
+            </a>
+        </p>
+
+        <!-- SOCIAL ICONS -->
+        <div class="social-icons">
+            <a href="https://www.facebook.com/sagardulal09" target="_blank"><i class="fab fa-facebook"></i></a>
+            <a href="https://www.instagram.com/itsme_sagar9/" target="_blank"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.tiktok.com/@sagardulal09" target="_blank"><i class="fab fa-tiktok"></i></a>
+            <a href="https://www.threads.com/@itsme_sagar9" target="_blank"><i class="fa-brands fa-threads"></i></a>
+            <a href="https://www.linkedin.com/in/sagardulal09/" target="_blank"><i class="fab fa-linkedin"></i></a>
+            <a href="https://x.com/SagarDulal09" target="_blank"><i class="fab fa-x-twitter"></i></a>
+        </div>
+    </footer>
+
+    <!-- ================= JS FILES ================= -->
+    <script src="js/loader.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/api.js"></script>
+
+</body>
+
+</html>
