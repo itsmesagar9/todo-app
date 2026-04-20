@@ -74,19 +74,9 @@ registerBtn.addEventListener("click", async () => {
 
     // ================= OTP =================
 
-    const otp = Math.floor(100000 + Math.random() * 900000);
-
-    localStorage.setItem("otp", otp);
-    localStorage.setItem("tempUser", JSON.stringify({
-        username, fullname, email, phone, password
-    }));
-
-    showToast("OTP sent (check console)", "success");
-    await apiRequest({
+await apiRequest({
     action: "sendOTP",
     email: email
-});
-    showOTPModal();
 });
 
 
