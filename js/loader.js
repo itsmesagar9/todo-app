@@ -1,31 +1,45 @@
-// ================= PRELOADER =================
 
-let progress = 0;
-const progressBar = document.getElementById("progress");
-const percentText = document.getElementById("percent");
-const preloader = document.getElementById("preloader");
-const authContainer = document.getElementById("authContainer");
+// ================= LOADER SYSTEM =================
 
-function startLoader() {
-    let interval = setInterval(() => {
-        progress++;
+document.addEventListener("DOMContentLoaded", () => {
 
-        progressBar.style.width = progress + "%";
-        percentText.innerText = progress + "%";
+    const loader = document.getElementById("loader");
+    const progressText = document.getElementById("progress");
 
-        if (progress >= 100) {
+    if (!loader || !progressText) {
+        console.error("Loader elements not found");
+        return;
+    }
+
+    let progress = 0;
+
+    // Smooth fake loading simulation (real SaaS style)
+    const interval = setInterval(() => {
+
+        progress += Math.floor(Math.random() * 10) + 1;
+
+        if (progress > 100) progress = 100;
+
+        progressText.innerText = progress + "%";
+
+        // When completed
+        if (progress === 100) {
+
             clearInterval(interval);
 
-            // Smooth fade out
-            preloader.style.opacity = "0";
-
             setTimeout(() => {
-                preloader.style.display = "none";
-                authContainer.classList.remove("hidden");
-            }, 500);
-        }
-    }, 20); // speed control
-}
 
-// Start when page loads
-window.addEventListener("load", startLoader);
+                // Smooth fade out
+                loader.style.opacity = "0";
+                loader.style.transition = "0.5s ease";
+
+                setTimeout(() => {
+                    loader.style.display = "none";
+                }, 500);
+
+            }, 300);
+
+        }
+
+    }, 120);
+});
