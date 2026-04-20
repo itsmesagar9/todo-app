@@ -99,19 +99,35 @@ function showOTPModal() {
 
     document.getElementById("verifyOtp").onclick = async () => {
 
-        const entered = document.getElementById("otpInput").value;
-        const realOtp = localStorage.getItem("otp");
+        document.getElementById("verifyOtp").onclick = async () => {
 
-        if (entered == realOtp) {
+    const entered = document.getElementById("otpInput").value;
+
+    const user = JSON.parse(localStorage.getItem("tempUser"));
+
+    try {
+
+        const result = await apiRequest({
+            action: "verifyOTP",
+            email: user.email,
+            otp: entered
+        });
+
+        if (result.status === "success") {
 
             modal.remove();
-            showToast("Registration Successful");
+            showToast("OTP Verified Successfully");
 
             await registerUserToSheet();
 
         } else {
-            showToast("Invalid OTP", "error");
+            showToast(result.message || "Invalid OTP", "error");
         }
+
+    } catch (err) {
+        showToast("Server error", "error");
+    }
+};
     };
 }
 
