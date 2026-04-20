@@ -1,22 +1,23 @@
+document.addEventListener("DOMContentLoaded", () => {
+
 // ================= AUTH SYSTEM =================
 
 // Buttons
 const registerBtn = document.getElementById("registerBtn");
 const loginBtn = document.getElementById("loginBtn");
 
+console.log("Auth JS Loaded");
+
 // ================= VALIDATION FUNCTIONS =================
 
-// Username must contain letters + numbers
 function isValidUsername(username) {
     return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]+$/.test(username);
 }
 
-// Email validation
 function isValidEmail(email) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-// Phone validation (simple)
 function isValidPhone(phone) {
     return /^[0-9]{7,15}$/.test(phone);
 }
@@ -26,6 +27,8 @@ function isValidPhone(phone) {
 
 registerBtn.addEventListener("click", async () => {
 
+    console.log("Register clicked"); // debug
+
     const username = document.getElementById("username").value.trim();
     const fullname = document.getElementById("fullname").value.trim();
     const email = document.getElementById("email").value.trim();
@@ -34,7 +37,6 @@ registerBtn.addEventListener("click", async () => {
     const confirmPassword = document.getElementById("confirmPassword").value;
     const agree = document.getElementById("agree").checked;
 
-    // 🔴 VALIDATIONS
     if (!username || !fullname || !email || !phone || !password || !confirmPassword) {
         showToast("All fields are required", "error");
         return;
@@ -70,18 +72,17 @@ registerBtn.addEventListener("click", async () => {
         return;
     }
 
-    // ================= OTP SIMULATION =================
+    // ================= OTP =================
 
     const otp = Math.floor(100000 + Math.random() * 900000);
 
-    // Store temporarily
     localStorage.setItem("otp", otp);
     localStorage.setItem("tempUser", JSON.stringify({
         username, fullname, email, phone, password
     }));
 
-    showToast("OTP sent (check console for now)", "success");
-    console.log("Your OTP:", otp);
+    showToast("OTP sent (check console)", "success");
+    console.log("OTP:", otp);
 
     showOTPModal();
 });
@@ -97,7 +98,7 @@ function showOTPModal() {
     modal.innerHTML = `
         <div class="modal-box">
             <h3>Enter OTP</h3>
-            <input type="text" id="otpInput" placeholder="Enter 6-digit OTP">
+            <input type="text" id="otpInput">
             <button id="verifyOtp">Verify</button>
         </div>
     `;
@@ -110,10 +111,10 @@ function showOTPModal() {
         const realOtp = localStorage.getItem("otp");
 
         if (entered == realOtp) {
+
             modal.remove();
             showToast("Registration Successful");
 
-            // 👉 CALL API HERE
             await registerUserToSheet();
 
         } else {
@@ -123,7 +124,7 @@ function showOTPModal() {
 }
 
 
-// ================= SEND TO GOOGLE SHEETS =================
+// ================= SEND TO SHEET =================
 
 async function registerUserToSheet() {
 
@@ -135,7 +136,7 @@ async function registerUserToSheet() {
 
         if (result.status === "success") {
 
-            showToast("Account Created Successfully");
+            showToast("Account Created");
 
             localStorage.removeItem("tempUser");
             localStorage.removeItem("otp");
@@ -150,6 +151,7 @@ async function registerUserToSheet() {
         showToast("Server error", "error");
     }
 }
+
 
 // ================= LOGIN =================
 
@@ -167,16 +169,12 @@ loginBtn.addEventListener("click", async () => {
 
         const result = await loginUser(email, password);
 
-        const result = await res.json();
-
         if (result.status === "success") {
 
             showToast("Login Successful");
 
-            // Save session
             localStorage.setItem("user", JSON.stringify(result.user));
 
-            // Redirect
             window.location.href = "dashboard.html";
 
         } else {
@@ -188,3 +186,5 @@ loginBtn.addEventListener("click", async () => {
     }
 
 });
+
+}); // 🔥 END DOMContentLoaded
