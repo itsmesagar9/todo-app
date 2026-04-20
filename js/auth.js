@@ -131,18 +131,15 @@ async function registerUserToSheet() {
 
     try {
 
-        // 👉 API CALL (you will connect later)
         const result = await registerUser(user);
 
-        const result = await res.json();
-
         if (result.status === "success") {
+
             showToast("Account Created Successfully");
 
             localStorage.removeItem("tempUser");
             localStorage.removeItem("otp");
 
-            // Switch to login
             document.getElementById("showLogin").click();
 
         } else {
@@ -153,7 +150,6 @@ async function registerUserToSheet() {
         showToast("Server error", "error");
     }
 }
-
 
 // ================= LOGIN =================
 
