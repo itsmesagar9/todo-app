@@ -1,198 +1,197 @@
-document.addEventListener("DOMContentLoaded", () => {
 
-// ================= AUTH SYSTEM =================
-
-// Buttons
-const registerBtn = document.getElementById("registerBtn");
-const loginBtn = document.getElementById("loginBtn");
-
-console.log("Auth JS Loaded");
-
-// ================= VALIDATION FUNCTIONS =================
-
-function isValidUsername(username) {
-    return /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]+$/.test(username);
-}
-
-function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-}
-
-function isValidPhone(phone) {
-    return /^[0-9]{7,15}$/.test(phone);
-}
+let currentUser = null;
+let tasks = [];
+let lists = [];
+let selectedListId = null;
 
 
-// ================= REGISTER =================
+// ================= INIT =================
+document.addEventListener("DOMContentLoaded", async () => {
 
-registerBtn.addEventListener("click", async () => {
+    currentUser = JSON.parse(localStorage.getItem("user"));
 
-    console.log("Register clicked"); // debug
-
-    const username = document.getElementById("username").value.trim();
-    const fullname = document.getElementById("fullname").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const password = document.getElementById("password").value;
-    const confirmPassword = document.getElementById("confirmPassword").value;
-    const agree = document.getElementById("agree").checked;
-
-    if (!username || !fullname || !email || !phone || !password || !confirmPassword) {
-        showToast("All fields are required", "error");
+    if (!currentUser) {
+        window.location.href = "index.html";
         return;
     }
 
-    if (!isValidUsername(username)) {
-        showToast("Username must include letters & numbers", "error");
-        return;
-    }
+    console.log("Dashboard Loaded for:", currentUser.email);
 
-    if (!isValidEmail(email)) {
-        showToast("Invalid email", "error");
-        return;
-    }
+    await loadLists();
+    await loadTasks();
 
-    if (!isValidPhone(phone)) {
-        showToast("Invalid phone number", "error");
-        return;
-    }
-
-    if (password.length < 6) {
-        showToast("Password must be at least 6 characters", "error");
-        return;
-    }
-
-    if (password !== confirmPassword) {
-        showToast("Passwords do not match", "error");
-        return;
-    }
-
-    if (!agree) {
-        showToast("You must agree to Terms", "error");
-        return;
-    }
-
-    // ================= OTP =================
-
-await apiRequest({
-    action: "sendOTP",
-    email: email
+    bindEvents();
 });
 
 
-// ================= OTP MODAL =================
+// ================= LOAD LISTS =================
+async function loadLists() {
 
-function showOTPModal() {
+    const res = await getLists(currentUser.id);
 
-    const modal = document.createElement("div");
-    modal.className = "modal";
-
-    modal.innerHTML = `
-        <div class="modal-box">
-            <h3>Enter OTP</h3>
-            <input type="text" id="otpInput">
-            <button id="verifyOtp">Verify</button>
-        </div>
-    `;
-
-    document.body.appendChild(modal);
-
-    document.getElementById("verifyOtp").onclick = async () => {
-
-        document.getElementById("verifyOtp").onclick = async () => {
-
-    const entered = document.getElementById("otpInput").value;
-
-    const user = JSON.parse(localStorage.getItem("tempUser"));
-
-    try {
-
-        const result = await apiRequest({
-            action: "verifyOTP",
-            email: user.email,
-            otp: entered
-        });
-
-        if (result.status === "success") {
-
-            modal.remove();
-            showToast("OTP Verified Successfully");
-
-            await registerUserToSheet();
-
-        } else {
-            showToast(result.message || "Invalid OTP", "error");
-        }
-
-    } catch (err) {
-        showToast("Server error", "error");
+    if (res.status === "success") {
+        lists = res.lists;
+        renderLists();
     }
-};
+}
+
+
+// ================= LOAD TASKS =================
+async function loadTasks() {
+
+    const res = await getTasks(currentUser.id);
+
+    if (res.status === "success") {
+        tasks = res.tasks;
+        renderTasks();
+    }
+}
+
+
+// ================= RENDER LISTS =================
+function renderLists() {
+
+    const container = document.getElementById("listContainer");
+    container.innerHTML = "";
+
+    lists.forEach(list => {
+
+        const li = document.createElement("li");
+        li.innerText = list.name;
+
+        li.onclick = () => {
+            selectedListId = list.id;
+            renderTasks();
+        };
+
+        container.appendChild(li);
+    });
+}
+
+
+// ================= RENDER TASKS =================
+function renderTasks() {
+
+    const container = document.getElementById("taskContainer");
+    const empty = document.getElementById("emptyState");
+
+    container.innerHTML = "";
+
+    let filtered = tasks;
+
+    // Filter by list
+    if (selectedListId) {
+        filtered = filtered.filter(t => t.listId === selectedListId);
+    }
+
+    // Filter by search
+    const search = document.getElementById("searchTask")?.value || "";
+    if (search) {
+        filtered = filtered.filter(t =>
+            t.title.toLowerCase().includes(search.toLowerCase())
+        );
+    }
+
+    // Filter by status
+    const status = document.getElementById("filterStatus")?.value;
+    if (status) {
+        filtered = filtered.filter(t => t.status === status);
+    }
+
+    if (filtered.length === 0) {
+        empty.style.display = "block";
+        return;
+    }
+
+    empty.style.display = "none";
+
+    filtered.forEach(task => {
+
+        const div = document.createElement("div");
+        div.className = "task";
+        div.setAttribute("data-status", task.status);
+
+        div.innerHTML = `
+            <h4>${task.title}</h4>
+            <p>Status: ${task.status}</p>
+            <button onclick="deleteTask('${task.id}')">Delete</button>
+            <button onclick="editTask('${task.id}')">Edit</button>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+
+// ================= CREATE TASK =================
+async function createTaskHandler() {
+
+    const title = prompt("Task Title");
+    if (!title) return;
+
+    const task = {
+        userId: currentUser.id,
+        listId: selectedListId || "",
+        title,
+        description: "",
+        status: "Not Started"
     };
-}
 
+    const res = await createTask(task);
 
-// ================= SEND TO SHEET =================
-
-async function registerUserToSheet() {
-
-    const user = JSON.parse(localStorage.getItem("tempUser"));
-
-    try {
-
-        const result = await registerUser(user);
-
-        if (result.status === "success") {
-
-            showToast("Account Created");
-
-            localStorage.removeItem("tempUser");
-            localStorage.removeItem("otp");
-
-            document.getElementById("showLogin").click();
-
-        } else {
-            showToast(result.message || "Registration failed", "error");
-        }
-
-    } catch (err) {
-        showToast("Server error", "error");
+    if (res.status === "success") {
+        await loadTasks();
     }
 }
 
 
-// ================= LOGIN =================
+// ================= DELETE TASK =================
+async function deleteTask(id) {
 
-loginBtn.addEventListener("click", async () => {
+    const res = await deleteItem(id, "task");
 
-    const email = document.getElementById("loginEmail").value.trim();
-    const password = document.getElementById("loginPassword").value;
-
-    if (!email || !password) {
-        showToast("Enter email & password", "error");
-        return;
+    if (res.status === "success") {
+        await loadTasks();
     }
+}
 
-    try {
 
-        const result = await loginUser(email, password);
+// ================= EDIT TASK =================
+async function editTask(id) {
 
-        if (result.status === "success") {
+    const task = tasks.find(t => t.id === id);
 
-            showToast("Login Successful");
+    const newTitle = prompt("Edit Task", task.title);
 
-            localStorage.setItem("user", JSON.stringify(result.user));
+    if (!newTitle) return;
 
-            window.location.href = "dashboard.html";
+    const updated = {
+        id,
+        title: newTitle,
+        description: task.description,
+        status: task.status
+    };
 
-        } else {
-            showToast("Invalid credentials", "error");
-        }
+    const res = await updateTaskAPI(updated);
 
-    } catch (err) {
-        showToast("Server error", "error");
+    if (res.status === "success") {
+        await loadTasks();
     }
+}
 
-});
 
-}); // 🔥 END DOMContentLoaded
+// ================= FILTER EVENTS =================
+function bindEvents() {
+
+    document.getElementById("searchTask").addEventListener("input", renderTasks);
+    document.getElementById("filterStatus").addEventListener("change", renderTasks);
+
+    document.getElementById("addTaskBtn").addEventListener("click", createTaskHandler);
+}
+
+
+// ================= LOGOUT =================
+function logout() {
+    localStorage.removeItem("user");
+    window.location.href = "index.html";
+}
